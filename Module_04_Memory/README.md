@@ -35,35 +35,32 @@
 ### 2.3 NUMA (Non-Uniform Memory Access)
 
 ```mermaid
-graph TB
-    subgraph NUMAArch["NUMA Architecture"]
-        subgraph Node0["NUMA Node 0"]
-            CPU0A["CPU 0"]
-            CPU0B["CPU 1"]
-            LocalMem0["Local Memory<br/>Fast Access<br/>~100ns"]
-            CPU0A <--> LocalMem0
-            CPU0B <--> LocalMem0
-        end
-        
-        subgraph Node1["NUMA Node 1"]
-            CPU1A["CPU 2"]
-            CPU1B["CPU 3"]
-            LocalMem1["Local Memory<br/>Fast Access<br/>~100ns"]
-            CPU1A <--> LocalMem1
-            CPU1B <--> LocalMem1
-        end
-        
-        LocalMem0 -.->|Remote 200-300ns| LocalMem1
-        LocalMem1 -.->|Remote 200-300ns| LocalMem0
+flowchart TB
+    subgraph Node0["NUMA Node 0"]
+        CPU0A["CPU 0"]
+        CPU0B["CPU 1"]
+        LocalMem0["Local Memory<br/>Fast Access ~100ns"]
+        CPU0A <--> LocalMem0
+        CPU0B <--> LocalMem0
     end
     
-    subgraph SQLServer2["SQL Server"]
+    subgraph Node1["NUMA Node 1"]
+        CPU1A["CPU 2"]
+        CPU1B["CPU 3"]
+        LocalMem1["Local Memory<br/>Fast Access ~100ns"]
+        CPU1A <--> LocalMem1
+        CPU1B <--> LocalMem1
+    end
+    
+    subgraph SQLServer2["SQL Server Schedulers"]
         Scheduler0["Scheduler 0<br/>(Node 0)"]
         Scheduler1["Scheduler 1<br/>(Node 1)"]
-        
-        Scheduler0 -->|Allocates| LocalMem0
-        Scheduler1 -->|Allocates| LocalMem1
     end
+    
+    LocalMem0 <-.->|Remote Access<br/>200-300ns| LocalMem1
+    
+    Scheduler0 -->|Allocates| LocalMem0
+    Scheduler1 -->|Allocates| LocalMem1
     
     style LocalMem0 fill:#3b82f6,stroke:#2563eb,stroke-width:3px,color:#fff
     style LocalMem1 fill:#3b82f6,stroke:#2563eb,stroke-width:3px,color:#fff
@@ -83,29 +80,32 @@ graph TB
 ### 3.1 Memory Models
 
 ```mermaid
-flowchart LR
-    subgraph Conventional["1. Conventional Memory Model<br/>(Default)"]
-        direction TB
-        C1["Dynamic Allocation"]
-        C2["OS สามารถ Paging ได้"]
-        C3["เสี่ยง Performance Degradation"]
-        C1 --> C2 --> C3
-    end
-    
-    subgraph LPIM["2. Lock Pages in Memory LPIM<br/>(Recommended)"]
-        direction TB
-        L1["Windows Policy:<br/>Lock Pages in Memory"]
-        L2["ป้องกัน Paging ลง Disk"]
-        L3["เสถียรภาพสูง"]
-        L1 --> L2 --> L3
-    end
-    
-    subgraph LargePage["3. Large Page Memory Model<br/>(Advanced)"]
-        direction TB
-        LP1["ใช้ 2MB Pages<br/>(แทน 4KB)"]
-        LP2["ลด TLB Overhead"]
-        LP3["Static Allocation<br/>Startup ช้า"]
-        LP1 --> LP2 --> LP3
+flowchart TB
+    subgraph Row1[" "]
+        direction LR
+        subgraph Conventional["1. Conventional Memory Model (Default)"]
+            direction TB
+            C1["Dynamic Allocation"]
+            C2["OS สามารถ Paging ได้"]
+            C3["เสี่ยง Performance Degradation"]
+            C1 --> C2 --> C3
+        end
+        
+        subgraph LPIM["2. Lock Pages in Memory LPIM (Recommended)"]
+            direction TB
+            L1["Windows Policy: Lock Pages in Memory"]
+            L2["ป้องกัน Paging ลง Disk"]
+            L3["เสถียรภาพสูง"]
+            L1 --> L2 --> L3
+        end
+        
+        subgraph LargePage["3. Large Page Memory Model (Advanced)"]
+            direction TB
+            LP1["ใช้ 2MB Pages (แทน 4KB)"]
+            LP2["ลด TLB Overhead"]
+            LP3["Static Allocation Startup ช้า"]
+            LP1 --> LP2 --> LP3
+        end
     end
     
     OS2["Windows OS"]
@@ -118,6 +118,7 @@ flowchart LR
     style LPIM fill:#10b981,stroke:#059669,stroke-width:3px,color:#fff
     style LargePage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
     style OS2 fill:#64748b,stroke:#475569,stroke-width:2px,color:#fff
+    style Row1 fill:transparent,stroke:transparent,color:transparent
 ```
 
 **รายละเอียด:**
@@ -132,33 +133,29 @@ flowchart LR
 ### 3.2 SQL Server Memory Architecture
 
 ```mermaid
-graph TB
+flowchart TB
     subgraph OS["Windows OS"]
         PhysicalRAM["Physical RAM"]
         PageFile["Page File<br/>(Virtual Memory)"]
     end
     
-    subgraph SQLServer["SQL Server Process (sqlservr.exe)"]
-        subgraph MemoryAllocator["Memory Allocator<br/>(Any Size Page Allocator)"]
-            direction TB
-            
-            subgraph BPool["Buffer Pool<br/>(SQLBUFFERPOOL)"]
-                DataPages["Data Pages<br/>(8KB)"]
-                IndexPages["Index Pages<br/>(8KB)"]
-            end
-            
-            subgraph OtherClerks["Other Memory Clerks"]
-                PlanCache["Plan Cache<br/>(CACHESTORE_SQLCP)"]
-                ConnectionPool["Connection Pool<br/>(MEMORYCLERK_SQLCONNECTIONPOOL)"]
-                LockManager["Lock Manager<br/>(OBJECTSTORE_LOCK_MANAGER)"]
-                WorkspaceGrant["Workspace Memory<br/>(WORKSPACE_MEMORY_GRANT)"]
-            end
-            
-            MTL["Memory To Leave<br/>(MTL)<br/>Non-BPool Allocations"]
-        end
-        
-        ResourceMonitor["Resource Monitor<br/>(Background Thread)<br/>ตรวจสอบ Memory Pressure"]
+    MemoryAllocator["Memory Allocator<br/>(Any Size Page Allocator)"]
+    
+    subgraph BPool["Buffer Pool (SQLBUFFERPOOL)"]
+        DataPages["Data Pages (8KB)"]
+        IndexPages["Index Pages (8KB)"]
     end
+    
+    subgraph OtherClerks["Other Memory Clerks"]
+        PlanCache["Plan Cache (CACHESTORE_SQLCP)"]
+        ConnectionPool["Connection Pool (MEMORYCLERK_SQLCONNECTIONPOOL)"]
+        LockManager["Lock Manager (OBJECTSTORE_LOCK_MANAGER)"]
+        WorkspaceGrant["Workspace Memory (WORKSPACE_MEMORY_GRANT)"]
+    end
+    
+    MTL["Memory To Leave (MTL)<br/>Non-BPool Allocations"]
+    
+    ResourceMonitor["Resource Monitor<br/>(Background Thread)<br/>ตรวจสอบ Memory Pressure"]
     
     PhysicalRAM -->|Allocate| MemoryAllocator
     MemoryAllocator --> BPool
@@ -174,6 +171,7 @@ graph TB
     style OtherClerks fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
     style MTL fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#fff
     style ResourceMonitor fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
+    style MemoryAllocator fill:#dc2626,stroke:#991b1b,stroke-width:2px,color:#fff
 ```
 
 **โครงสร้างหลัก:**
@@ -195,49 +193,46 @@ graph TB
 ### 3.4 Resource Governor
 
 ```mermaid
-graph TB
-    subgraph RG["Resource Governor"]
-        subgraph Classifier["Classifier Function"]
-            CF["Route Sessions<br/>Based on Criteria"]
-        end
-        
-        subgraph WorkloadGroups["Workload Groups"]
-            WG1["internal<br/>(System)"]
-            WG2["default<br/>(All Connections)"]
-            WG3["ReportUsers<br/>(Custom)"]
-            WG4["ETLUsers<br/>(Custom)"]
-        end
-        
-        subgraph ResourcePools["Resource Pools"]
-            RP1["internal<br/>MIN: 0%<br/>MAX: 100%"]
-            RP2["default<br/>MIN: 0%<br/>MAX: 100%"]
-            RP3["ReportPool<br/>MIN: 10%<br/>MAX: 40%<br/>(Limit Memory)"]
-            RP4["ETLPool<br/>MIN: 20%<br/>MAX: 50%"]
-        end
-        
-        CF --> WG1
-        CF --> WG2
-        CF --> WG3
-        CF --> WG4
-        
-        WG1 --> RP1
-        WG2 --> RP2
-        WG3 --> RP3
-        WG4 --> RP4
+flowchart TB
+    CF["Classifier Function<br/>Route Sessions Based on Criteria"]
+    
+    subgraph WorkloadGroups["Workload Groups"]
+        WG1["internal (System)"]
+        WG2["default (All Connections)"]
+        WG3["ReportUsers (Custom)"]
+        WG4["ETLUsers (Custom)"]
     end
     
-    subgraph Memory2["SQL Server Memory"]
-        TotalMem["Total Available Memory"]
-        TotalMem --> RP1
-        TotalMem --> RP2
-        TotalMem --> RP3
-        TotalMem --> RP4
+    subgraph ResourcePools["Resource Pools"]
+        RP1["internal<br/>MIN: 0% MAX: 100%"]
+        RP2["default<br/>MIN: 0% MAX: 100%"]
+        RP3["ReportPool<br/>MIN: 10% MAX: 40%<br/>(Limit Memory)"]
+        RP4["ETLPool<br/>MIN: 20% MAX: 50%"]
     end
+    
+    TotalMem["Total Available Memory<br/>(SQL Server Memory)"]
+    
+    CF --> WG1
+    CF --> WG2
+    CF --> WG3
+    CF --> WG4
+    
+    WG1 --> RP1
+    WG2 --> RP2
+    WG3 --> RP3
+    WG4 --> RP4
+    
+    TotalMem --> RP1
+    TotalMem --> RP2
+    TotalMem --> RP3
+    TotalMem --> RP4
     
     style RP3 fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#fff
     style RP4 fill:#8b5cf6,stroke:#7c3aed,stroke-width:3px,color:#fff
     style RP1 fill:#6b7280,stroke:#4b5563,stroke-width:2px,color:#fff
     style RP2 fill:#6b7280,stroke:#4b5563,stroke-width:2px,color:#fff
+    style CF fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff
+    style TotalMem fill:#84cc16,stroke:#65a30d,stroke-width:2px,color:#000
 ```
 
 เครื่องมือสำหรับจำกัดและจัดสรรทรัพยากร (CPU, Memory, I/O) ให้กับ Workload แต่ละประเภท
@@ -254,38 +249,34 @@ graph TB
 **สถาปัตยกรรม Buffer Pool:**
 
 ```mermaid
-graph TB
+flowchart TB
     subgraph SQLServerMemory["SQL Server Memory (Controlled by Max Server Memory)"]
         subgraph BufferPool["Buffer Pool (ส่วนใหญ่ ~70-90%)"]
             direction LR
-            P1["Page<br/>8KB<br/>Clean"]
-            P2["Page<br/>8KB<br/>Clean"]
-            P3["Page<br/>8KB<br/>Dirty"]
-            P4["Page<br/>8KB<br/>Dirty"]
-            P5["Page<br/>8KB<br/>Clean"]
+            P1["Page 8KB Clean"]
+            P2["Page 8KB Clean"]
+            P3["Page 8KB Dirty"]
+            P4["Page 8KB Dirty"]
+            P5["Page 8KB Clean"]
             
             P1 -.->|Modified| P3
             P4 -.->|Checkpoint| P2
         end
         
         subgraph MemoryClerks["Memory Clerks (อื่นๆ)"]
-            MC1["SQLQUERYPLAN<br/>(Plan Cache)"]
-            MC2["SQLCONNECTIONPOOL<br/>(Connection)"]
-            MC3["OBJECTSTORE_LOCK_MANAGER<br/>(Locks)"]
-            MC4["WORKSPACE_MEMORY_GRANT<br/>(Sort/Hash)"]
+            MC1["SQLQUERYPLAN (Plan Cache)"]
+            MC2["SQLCONNECTIONPOOL (Connection)"]
+            MC3["OBJECTSTORE_LOCK_MANAGER (Locks)"]
+            MC4["WORKSPACE_MEMORY_GRANT (Sort/Hash)"]
         end
         
-        MTL["Memory To Leave<br/>(MTL)"]
+        MTL["Memory To Leave (MTL)"]
     end
     
-    subgraph Processes["Memory Management Processes"]
-        LW["Lazy Writer<br/>เมื่อ Memory เต็ม<br/>ลบ Page ที่ไม่ได้ใช้<br/>(LRU Algorithm)"]
-        CP["Checkpoint<br/>เขียน Dirty Pages<br/>ลง Disk"]
-    end
+    LW["Lazy Writer<br/>เมื่อ Memory เต็ม ลบ Page ที่ไม่ได้ใช้<br/>(LRU Algorithm)"]
+    CP["Checkpoint<br/>เขียน Dirty Pages ลง Disk"]
     
-    subgraph Disk["Disk Storage"]
-        DataFiles["Data Files<br/>(.mdf, .ndf)"]
-    end
+    DataFiles["Data Files (.mdf, .ndf)<br/>(Disk Storage)"]
     
     BufferPool -->|Evict| LW
     BufferPool -->|Write| CP
@@ -300,6 +291,7 @@ graph TB
     style MTL fill:#ed8936,stroke:#c05621,stroke-width:2px,color:#fff
     style LW fill:#e53e3e,stroke:#c53030,stroke-width:2px,color:#fff
     style CP fill:#d69e2e,stroke:#b7791f,stroke-width:2px,color:#fff
+    style DataFiles fill:#9333ea,stroke:#7e22ce,stroke-width:2px,color:#fff
 ```
 
 **กระบวนการทำงาน:**
@@ -378,12 +370,11 @@ sequenceDiagram
 ### 4.1 Key Indicators
 
 ```mermaid
-graph TB
-    subgraph Indicators["Memory Pressure Indicators"]
+flowchart TB
+    subgraph Row1[" "]
         direction LR
-        
         subgraph Metric1["1. Buffer Cache Hit Ratio"]
-            BCHR["Target: > 90-95%<br/>(OLTP)"]
+            BCHR["Target: > 90-95% (OLTP)"]
             BCHRGood["✓ Cache Hit<br/>อ่านจาก Memory"]
             BCHRBad["✗ Cache Miss<br/>อ่านจาก Disk"]
             BCHR --> BCHRGood
@@ -397,19 +388,25 @@ graph TB
         end
         
         subgraph WaitTypes["3. Wait Types"]
-            WT1["RESOURCE_SEMAPHORE<br/>รอ Memory Grant<br/>(Sort/Hash)"]
-            WT2["CMEMTHREAD<br/>Thread Contention<br/>Memory Object"]
+            WT1["RESOURCE_SEMAPHORE<br/>รอ Memory Grant (Sort/Hash)"]
+            WT2["CMEMTHREAD<br/>Thread Contention Memory Object"]
         end
     end
     
-    subgraph Monitoring["Monitoring Tools"]
+    subgraph Monitoring["Monitoring Tools (DMVs)"]
+        direction LR
         DMV1["sys.dm_os_performance_counters<br/>Buffer Cache Hit Ratio"]
         DMV2["sys.dm_os_performance_counters<br/>Page Life Expectancy"]
         DMV3["sys.dm_os_wait_stats<br/>Wait Types"]
         DMV4["sys.dm_os_memory_clerks<br/>Memory Usage"]
     end
     
-    Indicators --> Monitoring
+    Metric1 --> DMV1
+    Metric2 --> DMV2
+    WaitTypes --> DMV3
+    Metric1 --> DMV4
+    Metric2 --> DMV4
+    WaitTypes --> DMV4
     
     style BCHRGood fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
     style BCHRBad fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
@@ -417,6 +414,8 @@ graph TB
     style PLEPressure fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
     style WT1 fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
     style WT2 fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    style Row1 fill:transparent,stroke:transparent,color:transparent
+    style Monitoring fill:#e0e7ff,stroke:#6366f1,stroke-width:2px
 ```
 
 **รายละเอียด:**
