@@ -53,8 +53,8 @@ flowchart TB
     end
     
     subgraph SQLServer2["SQL Server Schedulers"]
-        Scheduler0["Scheduler 0<br/>(Node 0)"]
-        Scheduler1["Scheduler 1<br/>(Node 1)"]
+        Scheduler0["Scheduler 0"]
+        Scheduler1["Scheduler 1"]
     end
     
     LocalMem0 <-.->|Remote<br/>200-300ns| LocalMem1
@@ -81,7 +81,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Conventional["1. Conventional (Default)"]
+    subgraph Conventional["1. Conventional"]
         direction TB
         C1["Dynamic Allocation"]
         C2["OS สามารถ Paging ได้"]
@@ -89,7 +89,7 @@ flowchart TB
         C1 --> C2 --> C3
     end
     
-    subgraph LPIM["2. LPIM (Recommended)"]
+    subgraph LPIM["2. LPIM"]
         direction TB
         L1["Windows Policy: Lock Pages"]
         L2["ป้องกัน Paging ลง Disk"]
@@ -97,9 +97,9 @@ flowchart TB
         L1 --> L2 --> L3
     end
     
-    subgraph LargePage["3. Large Page (Advanced)"]
+    subgraph LargePage["3. Large Page"]
         direction TB
-        LP1["ใช้ 2MB Pages (แทน 4KB)"]
+        LP1["ใช้ 2MB Pages แทน 4KB"]
         LP2["ลด TLB Overhead"]
         LP3["Static Allocation Startup ช้า"]
         LP1 --> LP2 --> LP3
@@ -135,7 +135,7 @@ flowchart TB
 flowchart TB
     subgraph OS["Windows OS"]
         PhysicalRAM["Physical RAM"]
-        PageFile["Page File (Virtual Memory)"]
+        PageFile["Page File"]
     end
     
     SpacerA[ ]
@@ -144,9 +144,9 @@ flowchart TB
     
     SpacerB[ ]
     
-    subgraph BPool["Buffer Pool (SQLBUFFERPOOL)"]
-        DataPages["Data Pages (8KB)"]
-        IndexPages["Index Pages (8KB)"]
+    subgraph BPool["Buffer Pool"]
+        DataPages["Data Pages 8KB"]
+        IndexPages["Index Pages 8KB"]
     end
     
     SpacerC[ ]
@@ -158,7 +158,7 @@ flowchart TB
         WorkspaceGrant["Workspace Memory"]
     end
     
-    MTL["Memory To Leave (MTL)"]
+    MTL["Memory To Leave"]
     
     SpacerD[ ]
     
@@ -210,10 +210,10 @@ flowchart TB
     SpacerRG1[ ]
     
     subgraph WorkloadGroups["Workload Groups"]
-        WG1["internal (System)"]
-        WG2["default (All Connections)"]
-        WG3["ReportUsers (Custom)"]
-        WG4["ETLUsers (Custom)"]
+        WG1["internal"]
+        WG2["default"]
+        WG3["ReportUsers"]
+        WG4["ETLUsers"]
     end
     
     SpacerRG2[ ]
@@ -271,8 +271,8 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph SQLServerMemory["SQL Server Memory (Max Server Memory)"]
-        subgraph BufferPool["Buffer Pool (~70-90%)"]
+    subgraph SQLServerMemory["SQL Server Memory"]
+        subgraph BufferPool["Buffer Pool"]
             direction LR
             P1["Page 8KB Clean"]
             P2["Page 8KB Clean"]
@@ -286,14 +286,14 @@ flowchart TB
         
         Spacer1[ ]
         
-        subgraph MemoryClerks["Memory Clerks (อื่นๆ)"]
+        subgraph MemoryClerks["Memory Clerks"]
             MC1["SQLQUERYPLAN"]
             MC2["SQLCONNECTIONPOOL"]
             MC3["OBJECTSTORE"]
             MC4["WORKSPACE"]
         end
         
-        MTL["Memory To Leave (MTL)"]
+        MTL["Memory To Leave"]
     end
     
     Spacer2[ ]
@@ -303,7 +303,7 @@ flowchart TB
     
     Spacer3[ ]
     
-    DataFiles["Data Files (.mdf, .ndf)<br/>Disk Storage"]
+    DataFiles["Data Files<br/>Disk Storage"]
     
     BufferPool -->|Evict| LW
     BufferPool -->|Write| CP
@@ -404,7 +404,7 @@ flowchart TB
     subgraph Row1[" "]
         direction LR
         subgraph Metric1["1. Buffer Cache Hit Ratio"]
-            BCHR["Target: > 90-95% (OLTP)"]
+            BCHR["Target: > 90-95%"]
             BCHRGood["✓ Cache Hit<br/>Memory"]
             BCHRBad["✗ Cache Miss<br/>Disk"]
             BCHR --> BCHRGood
@@ -425,7 +425,7 @@ flowchart TB
     
     SpacerM1[ ]
     
-    subgraph Monitoring["Monitoring Tools (DMVs)"]
+    subgraph Monitoring["Monitoring Tools"]
         direction LR
         DMV1["dm_os_performance_counters<br/>Buffer Cache Hit Ratio"]
         DMV2["dm_os_performance_counters<br/>Page Life Expectancy"]
