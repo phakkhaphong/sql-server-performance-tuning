@@ -136,26 +136,34 @@ flowchart TB
 flowchart TB
     subgraph OS["Windows OS"]
         PhysicalRAM["Physical RAM"]
-        PageFile["Page File<br/>(Virtual Memory)"]
+        PageFile["Page File (Virtual Memory)"]
     end
     
-    MemoryAllocator["Memory Allocator<br/>Any Size Page"]
+    SpacerA[ ]
     
-        subgraph BPool["Buffer Pool<br/>(SQLBUFFERPOOL)"]
-            DataPages["Data Pages<br/>(8KB)"]
-            IndexPages["Index Pages<br/>(8KB)"]
-        end
-        
-        subgraph OtherClerks["Other Memory Clerks"]
-            PlanCache["Plan Cache<br/>(CACHESTORE_SQLCP)"]
-            ConnectionPool["Connection Pool<br/>(MEMORYCLERK)"]
-            LockManager["Lock Manager<br/>(OBJECTSTORE)"]
-            WorkspaceGrant["Workspace Memory<br/>(WORKSPACE)"]
-        end
+    MemoryAllocator["Memory Allocator<br/>Any Size Page Allocator"]
     
-    MTL["Memory To Leave (MTL)<br/>Non-BPool"]
+    SpacerB[ ]
     
-    ResourceMonitor["Resource Monitor<br/>Background Thread<br/>Monitor Memory Pressure"]
+    subgraph BPool["Buffer Pool (SQLBUFFERPOOL)"]
+        DataPages["Data Pages (8KB)"]
+        IndexPages["Index Pages (8KB)"]
+    end
+    
+    SpacerC[ ]
+    
+    subgraph OtherClerks["Other Memory Clerks"]
+        PlanCache["Plan Cache"]
+        ConnectionPool["Connection Pool"]
+        LockManager["Lock Manager"]
+        WorkspaceGrant["Workspace Memory"]
+    end
+    
+    MTL["Memory To Leave (MTL)"]
+    
+    SpacerD[ ]
+    
+    ResourceMonitor["Resource Monitor<br/>Background Thread"]
     
     PhysicalRAM -->|Allocate| MemoryAllocator
     MemoryAllocator --> BPool
@@ -163,15 +171,19 @@ flowchart TB
     MemoryAllocator --> MTL
     
     ResourceMonitor -->|Monitor| PhysicalRAM
-    ResourceMonitor -->|Trim Caches เมื่อ LOW| MemoryAllocator
+    ResourceMonitor -->|Trim Caches| MemoryAllocator
     
-    OS -.->|LPIM: Lock Pages| MemoryAllocator
+    OS -.->|LPIM| MemoryAllocator
     
     style BPool fill:#2563eb,stroke:#1e40af,stroke-width:3px,color:#fff
     style OtherClerks fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
     style MTL fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#fff
     style ResourceMonitor fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
     style MemoryAllocator fill:#dc2626,stroke:#991b1b,stroke-width:2px,color:#fff
+    style SpacerA fill:transparent,stroke:transparent,color:transparent
+    style SpacerB fill:transparent,stroke:transparent,color:transparent
+    style SpacerC fill:transparent,stroke:transparent,color:transparent
+    style SpacerD fill:transparent,stroke:transparent,color:transparent
 ```
 
 **โครงสร้างหลัก:**
@@ -196,6 +208,8 @@ flowchart TB
 flowchart TB
     CF["Classifier Function<br/>Route Sessions"]
     
+    SpacerRG1[ ]
+    
     subgraph WorkloadGroups["Workload Groups"]
         WG1["internal (System)"]
         WG2["default (All Connections)"]
@@ -203,14 +217,18 @@ flowchart TB
         WG4["ETLUsers (Custom)"]
     end
     
+    SpacerRG2[ ]
+    
     subgraph ResourcePools["Resource Pools"]
         RP1["internal<br/>MIN: 0% MAX: 100%"]
         RP2["default<br/>MIN: 0% MAX: 100%"]
-        RP3["ReportPool<br/>MIN: 10% MAX: 40%<br/>Limited"]
+        RP3["ReportPool<br/>MIN: 10% MAX: 40%"]
         RP4["ETLPool<br/>MIN: 20% MAX: 50%"]
     end
     
-    TotalMem["Total Available<br/>Memory"]
+    SpacerRG3[ ]
+    
+    TotalMem["Total Available Memory"]
     
     CF --> WG1
     CF --> WG2
@@ -226,6 +244,10 @@ flowchart TB
     TotalMem --> RP2
     TotalMem --> RP3
     TotalMem --> RP4
+    
+    style SpacerRG1 fill:transparent,stroke:transparent,color:transparent
+    style SpacerRG2 fill:transparent,stroke:transparent,color:transparent
+    style SpacerRG3 fill:transparent,stroke:transparent,color:transparent
     
     style RP3 fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#fff
     style RP4 fill:#8b5cf6,stroke:#7c3aed,stroke-width:3px,color:#fff
@@ -250,33 +272,39 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph SQLServerMemory["SQL Server Memory<br/>(Max Server Memory)"]
-        subgraph BufferPool["Buffer Pool<br/>(~70-90%)"]
+    subgraph SQLServerMemory["SQL Server Memory (Max Server Memory)"]
+        subgraph BufferPool["Buffer Pool (~70-90%)"]
             direction LR
-            P1["Page<br/>8KB Clean"]
-            P2["Page<br/>8KB Clean"]
-            P3["Page<br/>8KB Dirty"]
-            P4["Page<br/>8KB Dirty"]
-            P5["Page<br/>8KB Clean"]
+            P1["Page 8KB Clean"]
+            P2["Page 8KB Clean"]
+            P3["Page 8KB Dirty"]
+            P4["Page 8KB Dirty"]
+            P5["Page 8KB Clean"]
             
             P1 -.->|Modified| P3
             P4 -.->|Checkpoint| P2
         end
         
-        subgraph MemoryClerks["Memory Clerks<br/>(อื่นๆ)"]
-            MC1["SQLQUERYPLAN<br/>(Plan Cache)"]
-            MC2["SQLCONNECTIONPOOL<br/>(Connection)"]
-            MC3["OBJECTSTORE<br/>(Locks)"]
-            MC4["WORKSPACE<br/>(Sort/Hash)"]
+        Spacer1[ ]
+        
+        subgraph MemoryClerks["Memory Clerks (อื่นๆ)"]
+            MC1["SQLQUERYPLAN"]
+            MC2["SQLCONNECTIONPOOL"]
+            MC3["OBJECTSTORE"]
+            MC4["WORKSPACE"]
         end
         
         MTL["Memory To Leave (MTL)"]
     end
     
-    LW["Lazy Writer<br/>Evict Unused Pages<br/>LRU Algorithm"]
-    CP["Checkpoint<br/>Write Dirty Pages<br/>to Disk"]
+    Spacer2[ ]
     
-    DataFiles["Data Files (.mdf, .ndf)<br/>(Disk Storage)"]
+    LW["Lazy Writer<br/>Evict Unused Pages<br/>LRU Algorithm"]
+    CP["Checkpoint<br/>Write Dirty Pages to Disk"]
+    
+    Spacer3[ ]
+    
+    DataFiles["Data Files (.mdf, .ndf)<br/>Disk Storage"]
     
     BufferPool -->|Evict| LW
     BufferPool -->|Write| CP
@@ -292,6 +320,9 @@ flowchart TB
     style LW fill:#e53e3e,stroke:#c53030,stroke-width:2px,color:#fff
     style CP fill:#d69e2e,stroke:#b7791f,stroke-width:2px,color:#fff
     style DataFiles fill:#9333ea,stroke:#7e22ce,stroke-width:2px,color:#fff
+    style Spacer1 fill:transparent,stroke:transparent,color:transparent
+    style Spacer2 fill:transparent,stroke:transparent,color:transparent
+    style Spacer3 fill:transparent,stroke:transparent,color:transparent
 ```
 
 **กระบวนการทำงาน:**
@@ -375,23 +406,25 @@ flowchart TB
         direction LR
         subgraph Metric1["1. Buffer Cache Hit Ratio"]
             BCHR["Target: > 90-95% (OLTP)"]
-            BCHRGood["✓ Cache Hit<br/>อ่านจาก Memory"]
-            BCHRBad["✗ Cache Miss<br/>อ่านจาก Disk"]
+            BCHRGood["✓ Cache Hit<br/>Memory"]
+            BCHRBad["✗ Cache Miss<br/>Disk"]
             BCHR --> BCHRGood
             BCHR --> BCHRBad
         end
         
-        subgraph Metric2["2. Page Life Expectancy (PLE)"]
-            PLENormal["Normal: เสถียร<br/>(ค่าสูง, เส้นราบ)"]
-            PLEPressure["Pressure: Sawtooth<br/>(ค่าตก, แนวโน้วลด)"]
+        subgraph Metric2["2. Page Life Expectancy"]
+            PLENormal["Normal: เสถียร<br/>ค่าสูง เส้นราบ"]
+            PLEPressure["Pressure: Sawtooth<br/>ค่าตก แนวโน้วลด"]
             PLENormal -.->|Memory Pressure| PLEPressure
         end
         
         subgraph WaitTypes["3. Wait Types"]
-            WT1["RESOURCE_SEMAPHORE<br/>Wait Memory Grant<br/>(Sort/Hash)"]
-            WT2["CMEMTHREAD<br/>Thread Contention<br/>Memory Object"]
+            WT1["RESOURCE_SEMAPHORE<br/>Wait Memory Grant"]
+            WT2["CMEMTHREAD<br/>Thread Contention"]
         end
     end
+    
+    SpacerM1[ ]
     
     subgraph Monitoring["Monitoring Tools (DMVs)"]
         direction LR
@@ -416,6 +449,7 @@ flowchart TB
     style WT2 fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
     style Row1 fill:transparent,stroke:transparent,color:transparent
     style Monitoring fill:#e0e7ff,stroke:#6366f1,stroke-width:2px
+    style SpacerM1 fill:transparent,stroke:transparent,color:transparent
 ```
 
 **รายละเอียด:**
