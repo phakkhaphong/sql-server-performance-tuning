@@ -23,16 +23,56 @@
 
 > **หลักการสำคัญ:** SQL Server อ่าน/เขียนข้อมูลเป็นหน่วย **Page** ไม่ใช่ Row ดังนั้น Query ที่ต้องอ่านหลาย Pages จะช้ากว่า Query ที่อ่านน้อย Pages
 
-### 2.1 Database Components
-ฐานข้อมูลประกอบด้วย Logical Objects (Tables/Views) ซึ่งถูกจัดเก็บใน Physical Files ดังนี้:
-1.  **File Groups**: กลุ่มของ Data Files ที่ช่วยในการบริหารจัดการ (Admin Unit) และการกระจาย I/O (Performance Unit)
-2.  **Data Files (.mdf/.ndf)**: ไฟล์สำหรับเก็บข้อมูลและ Index แนะนำให้กระจายหลายไฟล์เพื่อลด Allocation Contention (`GAM`/`SGAM` contention)
-3.  **Transaction Log Files (.ldf)**: ไฟล์บันทึกธุรกรรม (Write-Ahead Log)
-    *   *Note*: การมี Log File มากกว่า 1 ไฟล์ **ไม่ช่วยเพิ่มประสิทธิภาพ** เนื่องจาก Log Manager เขียนข้อมูลแบบลำดับ (Sequential)
-4.  **Extents**: หน่วยการจองพื้นที่ขนาด 64KB (ประกอบด้วย 8 Pages)
-    *   *Uniform Extent*: ทั้ง 8 Pages เป็นของ Object เดียว (มาตรฐานของ SQL Server ปัจจุบัน)
-    *   *Mixed Extent*: แชร์พื้นที่ร่วมกันหลาย Object (ใช้ในอดีตเพื่อประหยัดพื้นที่)
-5.  **Pages**: หน่วยย่อยที่สุดในการจัดเก็บข้อมูล ขนาด 8KB
+### 2.1 Database Components (Data Files Structure)
+
+ฐานข้อมูลใน SQL Server ประกอบด้วย **Data Files** (`.mdf`, `.ndf`) ซึ่งเก็บข้อมูลจริงและโครงสร้างของอ็อบเจ็กต์ (Tables, Indexes ฯลฯ) โครงสร้างฝั่ง Data Files ไล่จากหน่วยที่เล็กไปใหญ่ดังนี้:
+
+#### โครงสร้างลำดับชั้น: Page → Extent → File → Filegroup
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Filegroup (PRIMARY)                        │
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │   Data File 1    │  │   Data File 2    │  ...            │
+│  │    (.mdf/.ndf)   │  │    (.ndf)        │                 │
+│  │                  │  │                  │                 │
+│  │  ┌────────────┐  │  │  ┌────────────┐  │                 │
+│  │  │  Extent 1  │  │  │  │  Extent 1  │  │                 │
+│  │  │  ┌──────┐  │  │  │  │  ┌──────┐  │  │                 │
+│  │  │  │Page 1│  │  │  │  │  │Page 1│  │  │                 │
+│  │  │  │Page 2│  │  │  │  │  │Page 2│  │  │                 │
+│  │  │  │ ... │  │  │  │  │  │ ... │  │  │                 │
+│  │  │  │Page 8│  │  │  │  │  │Page 8│  │  │                 │
+│  │  │  └──────┘  │  │  │  │  └──────┘  │  │                 │
+│  │  │  Extent 2  │  │  │  │  Extent 2  │  │                 │
+│  │  │  ...       │  │  │  │  ...       │  │                 │
+│  │  └────────────┘  │  │  └────────────┘  │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**1. Pages (8KB)**  
+   - หน่วยย่อยที่สุดในการจัดเก็บข้อมูลใน Data File  
+   - ทุก Row/Index สุดท้ายจะถูกเก็บอยู่ใน Page เหล่านี้  
+   - ขนาดคงที่ 8,192 bytes (8KB)
+
+**2. Extents (64KB = 8 Pages)**  
+   - หน่วยการจองพื้นที่ขนาดใหญ่ขึ้น ประกอบด้วย 8 Pages ที่ต่อเนื่องกัน  
+   - *Uniform Extent*: ทั้ง 8 Pages เป็นของ Object เดียว (รูปแบบหลักในเวอร์ชันใหม่)  
+   - *Mixed Extent*: แชร์พื้นที่ร่วมกันหลาย Object (พบบ่อยในเวอร์ชันเก่าเพื่อประหยัดพื้นที่เริ่มต้นสำหรับตารางเล็ก)
+
+**3. Data Files (.mdf/.ndf)**  
+   - ประกอบด้วย Extents จำนวนมาก  
+   - `.mdf` = Primary Data File (มี 1 ไฟล์เสมอ)  
+   - `.ndf` = Secondary Data Files (สามารถมีหลายไฟล์)  
+   - การออกแบบให้มีหลายไฟล์ (ใน Filegroup เดียวกัน) ช่วยกระจาย I/O และลด Allocation Contention (`GAM`/`SGAM` contention)
+
+**4. Filegroups**  
+   - กลุ่มของ Data Files ที่ใช้เป็นหน่วยบริหารจัดการ (Admin Unit) และหน่วยวางแผน Performance  
+   - มีอย่างน้อย 1 กลุ่มเสมอคือ **PRIMARY Filegroup**  
+   - สามารถสร้าง Secondary Filegroups เพื่อแยก Data/Index ตามประเภทข้อมูล, อายุข้อมูล หรือ Storage Tier ได้
+
+> **หมายเหตุ:** Transaction Log Files (`.ldf`) จะอธิบายใน [หัวข้อ 5. Transaction Log Internals](#5-transaction-log-internals)
 
 ### 2.2 Page Types & Structure
 Page ขนาด 8192 bytes ประกอบด้วยส่วน Header, Data, และ Row Offset โดยมีประเภทที่สำคัญดังนี้:
