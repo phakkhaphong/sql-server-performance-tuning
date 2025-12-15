@@ -179,7 +179,7 @@ EXEC sp_query_store_set_hints @query_id = 123,
 
 ## 5. Lab: Statistics and Index Internals
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะระบุ Missing Indexes, ปรับแต่ง Query โดยกำจัด Key Lookups, ตรวจหา Stale Statistics และทำความสะอาด Bad Indexes
 

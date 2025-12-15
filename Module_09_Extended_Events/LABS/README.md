@@ -18,16 +18,16 @@
 ## Exercise 1: การดักจับ Deadlocks
 
 ### Step 1: สร้าง Session
-1.  เปิดไฟล์ `LABS\Scripts\01_Create_XE_Session.sql`
+1.  เปิดไฟล์ `Scripts\01_Create_XE_Session.sql`
 2.  รัน Script เพื่อสร้าง Session ชื่อ `XE_Deadlock_Monitor`
 3.  Start Session (ถ้ายังไม่ได้ Start)
 
 ### Step 2: สร้าง Workload
-1.  รัน Script **Deadlock Lab** จาก Module 5 อีกครั้ง (`Module_05_Concurrency\LABS\Scripts\02_Deadlock...`)
+1.  รัน Script **Deadlock Lab** จาก Module 5 อีกครั้ง (`Module_05_Concurrency\Scripts\02_Deadlock...`)
 2.  ทำให้เกิด Deadlock (Error 1205) จริงๆ
 
 ### Step 3: วิเคราะห์ข้อมูล
-1.  เปิดไฟล์ `LABS\Scripts\03_Read_XE_Data.sql`
+1.  เปิดไฟล์ `Scripts\03_Read_XE_Data.sql`
 2.  รัน Query เพื่อดึง XML จาก Ring Buffer
 3.  คลิกที่ Link XML เพื่อดู Deadlock Graph (จะเห็นภาพชัดเจนว่าใครฆ่าใคร)
 
@@ -48,7 +48,7 @@
 นอกจากการดู Deadlock แล้ว เรามักอยากรู้เรื่อง Blocking ที่นานเกินกำหนดด้วย (blocked_process_report)
 
 ### Steps (ขั้นตอน)
-1.  เปิดและรัน: `LABS\Scripts\04_XE_Blocking_Deadlock.sql`
+1.  เปิดและรัน: `Scripts\04_XE_Blocking_Deadlock.sql`
 2.  Script นี้จะสร้าง Session ที่จับทั้ง:
     *   `xml_deadlock_report` (เมื่อเกิด Deadlock)
     *   `blocked_process_report` (เมื่อมีการ Block นานกว่า Threshold ที่ตั้งไว้ใน sp_configure)

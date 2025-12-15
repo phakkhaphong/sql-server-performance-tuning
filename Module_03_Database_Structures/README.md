@@ -168,7 +168,7 @@ ORDER BY [Ghost Records] DESC;
 
 ## 6. Lab: Database Structures
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะวิเคราะห์จำนวน VLF, กำหนดค่า TempDB files และทำความเข้าใจพฤติกรรม Page Split
 

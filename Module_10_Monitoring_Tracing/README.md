@@ -185,7 +185,7 @@ graph TB
 
 ## 5. Lab: Establishing a Baseline
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะสร้าง Workload แบบผสม (Noise) และใช้ DMVs เพื่อจับสถานะปัจจุบันของเซิร์ฟเวอร์ สำหรับสร้าง Performance Baseline
 

@@ -19,7 +19,7 @@
 ## Exercise 1: การวินิจฉัยโรค (Diagnosis)
 
 ### Step 1: สร้างความโกลาหล (Chaos)
-1.  เปิดไฟล์ `LABS\Scripts\01_Chaos_Generator.sql` ใน **3-4 หน้าต่างแยกกัน**
+1.  เปิดไฟล์ `Scripts\01_Chaos_Generator.sql` ใน **3-4 หน้าต่างแยกกัน**
 2.  รันทุกหน้าต่างพร้อมกัน!
     *   Script นี้จะรันทั้ง Blocking, High CPU และ I/O มั่วไปหมด
 
@@ -42,6 +42,6 @@
 
 ## Exercise 2: Advanced Tools (Optional)
 สามารถใช้ Advanced Scripts ที่ Integrate เข้ามาเพื่อช่วยวิเคราะห์ได้:
-*   `Module_01_Architecture_Scheduling_Waits\LABS\Scripts\04_Yield_Mechanism.sql` ถ้าสงสัยเรื่อง CPU
-*   `Module_05_Concurrency\LABS\Scripts\08_Latch_Spinlock_Analysis.sql` ถ้าสงสัยเรื่อง Latch/Spinlock
+*   `Module_01_Architecture_Scheduling_Waits\Scripts\04_Yield_Mechanism.sql` ถ้าสงสัยเรื่อง CPU
+*   `Module_05_Concurrency\Scripts\08_Latch_Spinlock_Analysis.sql` ถ้าสงสัยเรื่อง Latch/Spinlock
 *   ใช้ DMV (`sys.dm_exec_requests`, `sys.dm_exec_query_plan`) หรือ Query Store เพื่อดู Plan ของตัวที่กำลังรันอยู่ (แทนการอ้างถึง Script เฉพาะ)

@@ -18,12 +18,12 @@
 ## Exercise 1: การวิเคราะห์ Blocking Chains
 
 ### Step 1: สร้างตัว Lock (Session A)
-1.  เปิดไฟล์ `LABS\Scripts\01_Blocking_SessionA.sql`
+1.  เปิดไฟล์ `Scripts\01_Blocking_SessionA.sql`
 2.  รัน Script
     *   Script นี้จะเริ่ม Transaction และทำการ Update ข้อมูลใน `Production.Product` **แต่ยังไม่ Commit**
 
 ### Step 2: ผู้เคราะห์ร้าย (Session B)
-1.  เปิด **หน้าต่างใหม่** (`LABS\Scripts\02_Blocking_SessionB.sql`)
+1.  เปิด **หน้าต่างใหม่** (`Scripts\02_Blocking_SessionB.sql`)
 2.  รัน Script
     *   Script นี้พยายามจะ `SELECT` แถวเดียวกับที่ Session A ถือ Lock อยู่
     *   **ผลลัพธ์**: Query จะหมุนติ้ว (Hangs) เพราะต้องรอ Lock (LCK_M_S รอ LCK_M_X)
@@ -50,12 +50,12 @@
 ## Exercise 2: การวิเคราะห์ Deadlocks
 
 ### Step 1: เตรียมการ Deadlock (Session A)
-1.  เปิดไฟล์ `LABS\Scripts\03_Deadlock_SessionA.sql`
+1.  เปิดไฟล์ `Scripts\03_Deadlock_SessionA.sql`
 2.  รัน **Step 1** (Update Table A)
 3.  **อย่าเพิ่ง** รัน Step 2
 
 ### Step 2: เตรียมการ Deadlock (Session B)
-1.  เปิดไฟล์ `LABS\Scripts\04_Deadlock_SessionB.sql`
+1.  เปิดไฟล์ `Scripts\04_Deadlock_SessionB.sql`
 2.  รัน **Step 1** (Update Table B)
 
 ### Step 3: จุดระเบิด (Trigger Deadlock)
@@ -78,7 +78,7 @@
 
 ### Steps (ขั้นตอน)
 1.  **คำเตือน**: Script นี้ใช้ `WAITFOR DELAY` และอาจมีการ Reset Stats ควรใช้ใน Lab เท่านั้น
-2.  รัน: `LABS\Scripts\08_Latch_Spinlock_Analysis.sql`
+2.  รัน: `Scripts\08_Latch_Spinlock_Analysis.sql`
 3.  รอ 5 วินาที เพื่อให้ Script เก็บข้อมูลความเปลี่ยนแปลง (Delta)
 4.  สังเกตผล:
     *   **Latch Class**: `BUFFER` (ปัญหา Page Contention) หรือ `ACCESS_METHODS_DATASET_PARENT` (ปัญหา Parallelism)

@@ -16,12 +16,12 @@
 ## Exercise 1: Generating Baseline Data
 
 ### Step 1: เริ่ม Workload
-1.  เปิดไฟล์ `LABS\Scripts\01_Workload_Noise.sql`
+1.  เปิดไฟล์ `Scripts\01_Workload_Noise.sql`
 2.  รัน Script นี้ใน **หลายๆ Query Window** (เช่น 3-5 หน้าต่าง) เพื่อให้เกิด Load พร้อมๆ กัน
     *   Script จะทำการ Read, Write และ Wait สลับกันไปมั่วๆ
 
 ### Step 2: Monitor Real-time
-1.  เปิดไฟล์ `LABS\Scripts\02_Monitor_Queries.sql`
+1.  เปิดไฟล์ `Scripts\02_Monitor_Queries.sql`
 2.  รัน Query เพื่อดู:
     *   **Top Wait Types**: อะไรคือสิ่งที่ระบบรอมากที่สุด?
     *   **Active Requests**: Thread เหล่านั้นกำลังทำอะไรอยู่?

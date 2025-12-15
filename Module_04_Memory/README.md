@@ -193,7 +193,7 @@ END;
 
 ## 6. Lab: Analyzing Memory Spills
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะระบุ Memory Spills (Sort Warnings) ใน Execution Plans และสังเกตว่า Memory Grant Feedback ของ SQL Server แก้ไขปัญหาอัตโนมัติอย่างไร
 

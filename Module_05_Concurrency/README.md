@@ -397,7 +397,7 @@ FROM sys.dm_tran_persistent_version_store_stats;
 
 ## 6. Lab: Analyzing Blocking and Deadlocks
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะใช้สอง Session เพื่อจำลองสถานการณ์ Blocking Chain และ Deadlock จากนั้นวิเคราะห์ปัญหาโดยใช้ DMVs
 

@@ -17,7 +17,7 @@ Report query ตัวหนึ่งทำงานช้าและมี "Wa
 ## Exercise 1: Memory Grant Spill & Feedback
 
 ### Step 1: Baseline (บังคับให้ Spill)
-1.  เปิดไฟล์ `LABS\Scripts\01_Memory_Spill.sql`
+1.  เปิดไฟล์ `Scripts\01_Memory_Spill.sql`
 2.  รัน Query **Step 1**
     *   Query จะทำการ `ORDER BY` คอลัมน์ขนาดใหญ่ (จำลองด้วย `CAST` เป็น `NVARCHAR(MAX)`)
     *   สังเกตไอคอน "Warning" สีเหลืองบน `Sort` Operator ใน Execution Plan

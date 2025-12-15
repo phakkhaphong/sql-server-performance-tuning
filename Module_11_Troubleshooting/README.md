@@ -98,7 +98,7 @@ flowchart TD
 
 ## 4. Lab: The "Broken Server" Simulation
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บสุดท้ายนี้ คุณจะได้ฝึกแก้ไขปัญหาเซิร์ฟเวอร์ที่มีปัญหาประสิทธิภาพหลายอย่างพร้อมกัน
 

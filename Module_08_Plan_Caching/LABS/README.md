@@ -17,7 +17,7 @@ Stored Procedure ตัวหนึ่งทำงานเร็วมากส
 ## Exercise 1: Parameter Sniffing
 
 ### Step 1: สร้างปัญหา (Stored Proc)
-1.  เปิดไฟล์ `LABS\Scripts\01_Parameter_Sniffing.sql`
+1.  เปิดไฟล์ `Scripts\01_Parameter_Sniffing.sql`
 2.  รัน **Step 1** เพื่อสร้าง Stored Procedure ชื่อ `GetOrdersByLocation`
     *   SP นี้ดึงข้อมูล Order ตาม `TerritoryID`
     *   *Note*: ข้อมูลมีความเบ้ (Data Skew) บาง Territory มี Order น้อย บางที่ก็มีเป็นล้าน

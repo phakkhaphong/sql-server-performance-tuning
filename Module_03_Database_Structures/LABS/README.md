@@ -17,7 +17,7 @@
 ## Exercise 1: Bad Index Design (Random GUID)
 
 ### Step 1: สร้างตาราง
-1.  เปิดไฟล์ `LABS\Scripts\01_Bad_vs_Good_Structure.sql`
+1.  เปิดไฟล์ `Scripts\01_Bad_vs_Good_Structure.sql`
 2.  รันส่วน "Setup Tables"
     *   `BadKeyTable`: ใช้ `NEWID()` เป็น Primary Key (Clustered) ซึ่งจะสุ่มค่าตลอดเวลา
     *   `GoodKeyTable`: ใช้ `INT IDENTITY` เป็น Primary Key (Clustered) ซึ่งจะเรียงลำดับสวยงาม
@@ -49,7 +49,7 @@
 ---
 
 ## Exercise 2: Ledger Tables (Optional - SQL 2022)
-เนื่องจากแล็บนี้ไม่มี Script แยกให้ในโฟลเดอร์ `LABS\Scripts` ให้ใช้เป็นการอ่านและทดลองจากเอกสาร Microsoft แทน:
+เนื่องจากแล็บนี้ไม่มี Script แยกให้ในโฟลเดอร์ `Scripts` ให้ใช้เป็นการอ่านและทดลองจากเอกสาร Microsoft แทน:
 1. ศึกษาแนวคิด Ledger จากเอกสาร Microsoft Learn (SQL Server Ledger Tables)
 2. ลองออกแบบตารางที่ต้องการป้องกันการแก้ไขย้อนหลัง และพิจารณาว่าจะใช้ Ledger อย่างไรในระบบจริงของคุณ
 
@@ -62,7 +62,7 @@
 การดู Page Split จาก Transaction Log เป็นเรื่องยุ่งยาก XEvents มี Event ชื่อ `page_split` ที่เบาและใช้ง่ายกว่า
 
 ### Steps (ขั้นตอน)
-1.  เปิดและรัน `Module_09_Extended_Events\LABS\Scripts\05_Page_Splits_Tracking.sql`
+1.  เปิดและรัน `Module_09_Extended_Events\Scripts\05_Page_Splits_Tracking.sql`
     *   Script นี้จะสร้าง XEvent Session และเริ่มจับข้อมูลทันที
 2.  ลองรัน Workload Insert (Random GUID) อีกครั้ง
 3.  ดูข้อมูลใน Ring Buffer จาก Query หรือ Watch Live Data

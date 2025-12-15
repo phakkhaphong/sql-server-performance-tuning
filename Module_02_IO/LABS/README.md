@@ -17,7 +17,7 @@
 ## Exercise 1: การวัดค่า I/O (Logical vs Physical)
 
 ### Step 1: วิเคราะห์ Logical Reads (Cold Cache vs Warm Cache)
-1.  เปิดไฟล์ `LABS\Scripts\01_Workload_IO.sql`
+1.  เปิดไฟล์ `Scripts\01_Workload_IO.sql`
 2.  เปิดโหมด "Include Actual Execution Plan" (Ctrl+M)
 3.  รัน Script ส่วน **Step 1 (Cold Cache)**:
     *   คำสั่งนี้จะบังคับให้ SQL อ่านข้อมูลจาก Disk จริงๆ (Physical Read)
@@ -62,7 +62,7 @@
 ในขณะที่ `sys.dm_io_virtual_file_stats` บอกค่า Latency รายไฟล์ แต่บางครั้งคอขวดอาจจะอยู่ที่ตัว **Physical Drive** เอง (ซึ่งแชร์กันหลายไฟล์ หรือหลาย Database)
 
 ### Steps (ขั้นตอน)
-1.  เปิดและรัน: `LABS\Scripts\02_Drive_Latency.sql`
+1.  เปิดและรัน: `Scripts\02_Drive_Latency.sql`
 2.  วิเคราะห์คอลัมน์ต่างๆ:
     *   **Read/Write Latency**: แยกค่า Latency ของการอ่านและเขียน เพื่อดูว่าช้าที่ฝั่งไหน
     *   **Overall Latency**: ค่าเฉลี่ยรวม

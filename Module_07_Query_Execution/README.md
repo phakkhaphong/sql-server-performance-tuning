@@ -251,7 +251,7 @@ ALTER DATABASE [YourDB] SET COMPATIBILITY_LEVEL = 170;
 
 ## 6. Lab: Analyzing Execution Plans
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะระบุปัญหาประสิทธิภาพเช่น Implicit Conversions และเรียนรู้วิธีแก้ไขเพื่อให้ได้ Index Seek กลับคืนมา
 

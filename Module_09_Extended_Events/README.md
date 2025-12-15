@@ -152,7 +152,7 @@ Default Session ที่รันอยู่ตลอดเวลา (Always-o
 ---
 
 ## 6. Lab: Troubleshooting with XEvents
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะกำหนดค่า XEvent session เพื่อจับ Wait Stats และ Deadlocks จากนั้นวิเคราะห์ผลลัพธ์
 

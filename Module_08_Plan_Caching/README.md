@@ -248,7 +248,7 @@ graph LR
 
 ## 6. Lab: Analyzing Plan Cache Issues
 
-**[ไปยังคำแนะนำแล็บ](LABS/Lab_Instructions.md)**
+**[ไปยังคำแนะนำแล็บ](Labs/README.md)**
 
 ในแล็บนี้ คุณจะจำลองปัญหา Parameter Sniffing และแก้ไขโดยใช้ Recompilation hints และ Query Store Plan Forcing
 

@@ -58,9 +58,9 @@ Module_XX_Topic/
 ├── Scripts/              # 📺 Demo Scripts (สำหรับสาธิตแนวคิด)
 │   ├── 00_Workload_*.sql  # Workload scripts สำหรับสร้างโหลด
 │   └── README_Workload.md # คำแนะนำการใช้งาน Workload
-└── LABS/
-    ├── Lab_Instructions.md # 📝 คำแนะนำแล็บ
-    └── Scripts/            # 🧪 Lab Scripts (แบบฝึกหัดสำหรับผู้เรียน)
+└── Labs/
+    ├── README.md          # 📝 คำแนะนำแล็บ
+    └── Scripts/          # 🧪 Lab Scripts (แบบฝึกหัดสำหรับผู้เรียน)
 ```
 
 ### Prerequisites
@@ -118,7 +118,7 @@ Module_XX_Topic/
 - **Workload Scripts**: สร้างโหลดเพื่อให้ Demo Scripts แสดงผลลัพธ์ที่ชัดเจน
 - **Diagnostic Scripts**: วิเคราะห์สถานะและประสิทธิภาพของระบบ
 
-### Lab Scripts (`LABS/Scripts/`)
+### Lab Scripts (`Labs/Scripts/`)
 แบบฝึกหัดสำหรับผู้เรียน เพื่อนำความรู้มาแก้ปัญหาจริง
 
 - **Hands-on Exercises**: ฝึกปฏิบัติตามสถานการณ์จริง
