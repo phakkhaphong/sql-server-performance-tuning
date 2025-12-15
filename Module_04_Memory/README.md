@@ -33,6 +33,44 @@
     *   *Impact*: หาก Windows ทำการ Paging Process ของ SQL Server จะส่งผลกระทบต่อประสิทธิภาพอย่างรุนแรง (Performance Degradation)
 
 ### 2.3 NUMA (Non-Uniform Memory Access)
+
+```mermaid
+graph TB
+    subgraph NUMAArch["NUMA Architecture"]
+        subgraph Node0["NUMA Node 0"]
+            CPU0A["CPU 0"]
+            CPU0B["CPU 1"]
+            LocalMem0["Local Memory<br/>Fast Access<br/>~100ns"]
+            CPU0A <--> LocalMem0
+            CPU0B <--> LocalMem0
+        end
+        
+        subgraph Node1["NUMA Node 1"]
+            CPU1A["CPU 2"]
+            CPU1B["CPU 3"]
+            LocalMem1["Local Memory<br/>Fast Access<br/>~100ns"]
+            CPU1A <--> LocalMem1
+            CPU1B <--> LocalMem1
+        end
+        
+        LocalMem0 -.->|Remote Access<br/>~200-300ns<br/>(Slower)| LocalMem1
+        LocalMem1 -.->|Remote Access<br/>~200-300ns<br/>(Slower)| LocalMem0
+    end
+    
+    subgraph SQLServer2["SQL Server"]
+        Scheduler0["Scheduler 0<br/>(Node 0)"]
+        Scheduler1["Scheduler 1<br/>(Node 1)"]
+        
+        Scheduler0 -->|Allocates| LocalMem0
+        Scheduler1 -->|Allocates| LocalMem1
+    end
+    
+    style LocalMem0 fill:#3b82f6,stroke:#2563eb,stroke-width:3px,color:#fff
+    style LocalMem1 fill:#3b82f6,stroke:#2563eb,stroke-width:3px,color:#fff
+    style Scheduler0 fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    style Scheduler1 fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+```
+
 สถาปัตยกรรมที่ออกแบบมาเพื่อลดคอขวดของ Memory Bus ในระบบที่มี CPU จำนวนมาก
 *   **Local Memory**: หน่วยความจำที่เชื่อมต่อกับ CPU Node นั้นๆ โดยตรง (Access เร็วที่สุด)
 *   **Remote Memory**: หน่วยความจำที่อยู่ต่าง Node (Access ช้ากว่า)
@@ -43,6 +81,46 @@
 ## 3. SQL Server Memory (Lesson 2)
 
 ### 3.1 Memory Models
+
+```mermaid
+graph LR
+    subgraph MemoryModels["SQL Server Memory Models"]
+        direction TB
+        
+        subgraph Conventional["1. Conventional Memory Model<br/>(Default)"]
+            C1["Dynamic Allocation"]
+            C2["OS สามารถ Paging ได้"]
+            C3["เสี่ยง Performance<br/>Degradation"]
+            C1 --> C2 --> C3
+        end
+        
+        subgraph LPIM["2. Lock Pages in Memory (LPIM)<br/>(Recommended for Production)"]
+            L1["Windows Policy:<br/>Lock Pages in Memory"]
+            L2["ป้องกัน Paging<br/>ลง Disk"]
+            L3["เสถียรภาพสูง"]
+            L1 --> L2 --> L3
+        end
+        
+        subgraph LargePage["3. Large Page Memory Model<br/>(Advanced)"]
+            LP1["ใช้ 2MB Pages<br/>(แทน 4KB)"]
+            LP2["ลด TLB Overhead"]
+            LP3["Static Allocation<br/>Startup ช้า"]
+            LP1 --> LP2 --> LP3
+        end
+    end
+    
+    OS2["Windows OS"]
+    
+    Conventional --> OS2
+    LPIM -.->|Lock| OS2
+    LargePage --> OS2
+    
+    style Conventional fill:#fbbf24,stroke:#f59e0b,stroke-width:2px
+    style LPIM fill:#10b981,stroke:#059669,stroke-width:3px,color:#fff
+    style LargePage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
+```
+
+**รายละเอียด:**
 1.  **Conventional Memory Model**: รูปแบบมาตรฐาน (Dynamic Allocation) OS สามารถทำ Paging ได้
 2.  **Locked Memory Model (LPIM)**: การกำหนดสิทธิ์ **Lock Pages in Memory**
     *   ป้องกันไม่ให้ Windows นำ SQL Server Memory ไปทำ Paging ลง Disk
@@ -52,6 +130,53 @@
     *   *Drawback*: ต้องจองพื้นที่ทั้งหมดตั้งแต่ Startup (Static Allocation) อาจทำให้เปิด Service ช้า
 
 ### 3.2 SQL Server Memory Architecture
+
+```mermaid
+graph TB
+    subgraph OS["Windows OS"]
+        PhysicalRAM["Physical RAM"]
+        PageFile["Page File<br/>(Virtual Memory)"]
+    end
+    
+    subgraph SQLServer["SQL Server Process (sqlservr.exe)"]
+        subgraph MemoryAllocator["Memory Allocator<br/>(Any Size Page Allocator)"]
+            direction TB
+            
+            subgraph BPool["Buffer Pool<br/>(SQLBUFFERPOOL)"]
+                DataPages["Data Pages<br/>(8KB)"]
+                IndexPages["Index Pages<br/>(8KB)"]
+            end
+            
+            subgraph OtherClerks["Other Memory Clerks"]
+                PlanCache["Plan Cache<br/>(CACHESTORE_SQLCP)"]
+                ConnectionPool["Connection Pool<br/>(MEMORYCLERK_SQLCONNECTIONPOOL)"]
+                LockManager["Lock Manager<br/>(OBJECTSTORE_LOCK_MANAGER)"]
+                WorkspaceGrant["Workspace Memory<br/>(WORKSPACE_MEMORY_GRANT)"]
+            end
+            
+            MTL["Memory To Leave<br/>(MTL)<br/>Non-BPool Allocations"]
+        end
+        
+        ResourceMonitor["Resource Monitor<br/>(Background Thread)<br/>ตรวจสอบ Memory Pressure"]
+    end
+    
+    PhysicalRAM -->|Allocate| MemoryAllocator
+    MemoryAllocator --> BPool
+    MemoryAllocator --> OtherClerks
+    MemoryAllocator --> MTL
+    
+    ResourceMonitor -->|Monitor| PhysicalRAM
+    ResourceMonitor -->|Trim Caches<br/>เมื่อ LOW| MemoryAllocator
+    
+    OS -.->|LPIM: Lock Pages<br/>(ป้องกัน Paging)| MemoryAllocator
+    
+    style BPool fill:#2563eb,stroke:#1e40af,stroke-width:3px,color:#fff
+    style OtherClerks fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
+    style MTL fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#fff
+    style ResourceMonitor fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
+```
+
+**โครงสร้างหลัก:**
 *   **Memory Allocator**: ตัวจัดการการของหน่วยความจำจาก OS
 *   **Memory Clerks**: ส่วนประกอบที่ทำหน้าที่ดูแลหน่วยความจำแต่ละประเภท
     *   *SQLBUFFERPOOL*: จัดการ Data Pages (Cache หลัก)
@@ -68,6 +193,53 @@
 ---
 
 ### 3.4 Resource Governor
+
+```mermaid
+graph TB
+    subgraph RG["Resource Governor"]
+        subgraph Classifier["Classifier Function"]
+            CF["Route Sessions<br/>Based on Criteria"]
+        end
+        
+        subgraph WorkloadGroups["Workload Groups"]
+            WG1["internal<br/>(System)"]
+            WG2["default<br/>(All Connections)"]
+            WG3["ReportUsers<br/>(Custom)"]
+            WG4["ETLUsers<br/>(Custom)"]
+        end
+        
+        subgraph ResourcePools["Resource Pools"]
+            RP1["internal<br/>MIN: 0%<br/>MAX: 100%"]
+            RP2["default<br/>MIN: 0%<br/>MAX: 100%"]
+            RP3["ReportPool<br/>MIN: 10%<br/>MAX: 40%<br/>(Limit Memory)"]
+            RP4["ETLPool<br/>MIN: 20%<br/>MAX: 50%"]
+        end
+        
+        CF --> WG1
+        CF --> WG2
+        CF --> WG3
+        CF --> WG4
+        
+        WG1 --> RP1
+        WG2 --> RP2
+        WG3 --> RP3
+        WG4 --> RP4
+    end
+    
+    subgraph Memory2["SQL Server Memory"]
+        TotalMem["Total Available Memory"]
+        TotalMem --> RP1
+        TotalMem --> RP2
+        TotalMem --> RP3
+        TotalMem --> RP4
+    end
+    
+    style RP3 fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#fff
+    style RP4 fill:#8b5cf6,stroke:#7c3aed,stroke-width:3px,color:#fff
+    style RP1 fill:#6b7280,stroke:#4b5563,stroke-width:2px,color:#fff
+    style RP2 fill:#6b7280,stroke:#4b5563,stroke-width:2px,color:#fff
+```
+
 เครื่องมือสำหรับจำกัดและจัดสรรทรัพยากร (CPU, Memory, I/O) ให้กับ Workload แต่ละประเภท
 *   **Workload Group**: กลุ่มของผู้ใช้งาน (เช่น Report Users, Data Load Users)
 *   **Resource Pool**: การกำหนดโควต้าทรัพยากร (MIN/MAX Usage)
@@ -81,20 +253,53 @@
 
 **สถาปัตยกรรม Buffer Pool:**
 
-```
-┌─────────────────────────────────────────────────┐
-│              SQL Server Memory                   │
-│  ┌──────────────────────────────────────────┐   │
-│  │           Buffer Pool (ส่วนใหญ่)           │   │
-│  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ │   │
-│  │  │Page │ │Page │ │Page │ │Page │ │Page │ │   │
-│  │  │8KB  │ │8KB  │ │8KB  │ │8KB  │ │8KB  │ │   │
-│  │  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ │   │
-│  │  Clean Pages ←→ Dirty Pages (Modified)   │   │
-│  └──────────────────────────────────────────┘   │
-│  Lazy Writer ↓ เมื่อ Memory เต็ม               │
-│  Checkpoint ↓ เขียน Dirty Pages ลง Disk        │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph SQLServerMemory["SQL Server Memory (Controlled by Max Server Memory)"]
+        subgraph BufferPool["Buffer Pool (ส่วนใหญ่ ~70-90%)"]
+            direction LR
+            P1["Page<br/>8KB<br/>Clean"]
+            P2["Page<br/>8KB<br/>Clean"]
+            P3["Page<br/>8KB<br/>Dirty"]
+            P4["Page<br/>8KB<br/>Dirty"]
+            P5["Page<br/>8KB<br/>Clean"]
+            
+            P1 -.->|Modified| P3
+            P4 -.->|Checkpoint| P2
+        end
+        
+        subgraph MemoryClerks["Memory Clerks (อื่นๆ)"]
+            MC1["SQLQUERYPLAN<br/>(Plan Cache)"]
+            MC2["SQLCONNECTIONPOOL<br/>(Connection)"]
+            MC3["OBJECTSTORE_LOCK_MANAGER<br/>(Locks)"]
+            MC4["WORKSPACE_MEMORY_GRANT<br/>(Sort/Hash)"]
+        end
+        
+        MTL["Memory To Leave<br/>(MTL)"]
+    end
+    
+    subgraph Processes["Memory Management Processes"]
+        LW["Lazy Writer<br/>เมื่อ Memory เต็ม<br/>ลบ Page ที่ไม่ได้ใช้<br/>(LRU Algorithm)"]
+        CP["Checkpoint<br/>เขียน Dirty Pages<br/>ลง Disk"]
+    end
+    
+    subgraph Disk["Disk Storage"]
+        DataFiles["Data Files<br/>(.mdf, .ndf)"]
+    end
+    
+    BufferPool -->|Evict| LW
+    BufferPool -->|Write| CP
+    CP -->|Persist| DataFiles
+    DataFiles -->|Physical Read| BufferPool
+    
+    SQLServerMemory --> MemoryClerks
+    SQLServerMemory --> MTL
+    
+    style BufferPool fill:#4a90e2,stroke:#2c5282,stroke-width:3px,color:#fff
+    style MemoryClerks fill:#38a169,stroke:#2f855a,stroke-width:2px,color:#fff
+    style MTL fill:#ed8936,stroke:#c05621,stroke-width:2px,color:#fff
+    style LW fill:#e53e3e,stroke:#c53030,stroke-width:2px,color:#fff
+    style CP fill:#d69e2e,stroke:#b7791f,stroke-width:2px,color:#fff
 ```
 
 **กระบวนการทำงาน:**
@@ -127,6 +332,42 @@
         > `Scripts\03_Resource_Monitor_Ring_Buffer.sql`
 
 3.  **Dynamic Memory Management**:
+
+```mermaid
+sequenceDiagram
+    participant Query as Query Request
+    participant BP as Buffer Pool
+    participant RM as Resource Monitor
+    participant OS as Windows OS
+    
+    Note over Query,OS: Normal Operation (RESOURCE_MEMPHYSICAL_HIGH)
+    Query->>BP: Check Page in Cache?
+    alt Page Found (Cache Hit)
+        BP-->>Query: Return Page (~100ns)
+    else Page Not Found (Cache Miss)
+        BP->>OS: Physical Read from Disk
+        OS-->>BP: Return Page (~10ms)
+        BP-->>Query: Return Page
+    end
+    
+    Note over RM,OS: Memory Pressure Detection
+    OS->>RM: Signal: RESOURCE_MEMPHYSICAL_LOW
+    RM->>BP: Trim Caches (LRU)
+    RM->>OS: Release Memory
+    
+    Note over BP,OS: Memory Management
+    BP->>BP: Calculate Target Memory<br/>(Based on Available RAM)
+    loop Ramp-up Phase
+        BP->>OS: Request More Memory
+        OS-->>BP: Grant Memory
+        Note over BP: Committed < Target
+    end
+    
+    Note over BP,OS: Steady State
+    BP->>BP: Target Memory = Committed Memory
+```
+
+**หลักการทำงาน:**
     *   SQL Server ปรับขนาด Memory อัตโนมัติ โดยดูจาก **Target Memory** (เป้าหมายที่อยากได้) vs **Committed Memory** (ที่ขอ OS มาได้จริง)
     *   *Ramp-up*: ช่วงเริ่มต้น Service ที่จะทยอยขอ Memory จนถึง Target
 
@@ -135,6 +376,50 @@
 ## 4. Investigating Memory Pressure
 
 ### 4.1 Key Indicators
+
+```mermaid
+graph TB
+    subgraph Indicators["Memory Pressure Indicators"]
+        direction LR
+        
+        subgraph Metric1["1. Buffer Cache Hit Ratio"]
+            BCHR["Target: > 90-95%<br/>(OLTP)"]
+            BCHRGood["✓ Cache Hit<br/>อ่านจาก Memory"]
+            BCHRBad["✗ Cache Miss<br/>อ่านจาก Disk"]
+            BCHR --> BCHRGood
+            BCHR --> BCHRBad
+        end
+        
+        subgraph Metric2["2. Page Life Expectancy (PLE)"]
+            PLENormal["Normal: เสถียร<br/>(ค่าสูง, เส้นราบ)"]
+            PLEPressure["Pressure: Sawtooth<br/>(ค่าตก, แนวโน้วลด)"]
+            PLENormal -.->|Memory Pressure| PLEPressure
+        end
+        
+        subgraph WaitTypes["3. Wait Types"]
+            WT1["RESOURCE_SEMAPHORE<br/>รอ Memory Grant<br/>(Sort/Hash)"]
+            WT2["CMEMTHREAD<br/>Thread Contention<br/>Memory Object"]
+        end
+    end
+    
+    subgraph Monitoring["Monitoring Tools"]
+        DMV1["sys.dm_os_performance_counters<br/>Buffer Cache Hit Ratio"]
+        DMV2["sys.dm_os_performance_counters<br/>Page Life Expectancy"]
+        DMV3["sys.dm_os_wait_stats<br/>Wait Types"]
+        DMV4["sys.dm_os_memory_clerks<br/>Memory Usage"]
+    end
+    
+    Indicators --> Monitoring
+    
+    style BCHRGood fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    style BCHRBad fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
+    style PLENormal fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    style PLEPressure fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
+    style WT1 fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    style WT2 fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+```
+
+**รายละเอียด:**
 1.  **Buffer Cache Hit Ratio**: อัตราการอ่านข้อมูลได้จาก Cache (ควร > 90-95% สำหรับ OLTP)
 2.  **Page Life Expectancy (PLE)**: ค่าเฉลี่ยเวลาที่ Page อยู่ใน Memory (Unit: วินาที)
     *   *Trend*: หากค่าลดลงอย่างรวดเร็ว (Sawtooth pattern) บ่งชี้ถึงแรงกดดันด้าน Memory (Memory Pressure)
