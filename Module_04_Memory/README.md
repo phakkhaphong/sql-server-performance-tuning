@@ -81,31 +81,28 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Row1[" "]
-        direction LR
-        subgraph Conventional["1. Conventional<br/>(Default)"]
-            direction TB
-            C1["Dynamic Allocation"]
-            C2["OS สามารถ Paging ได้"]
-            C3["เสี่ยง Performance<br/>Degradation"]
-            C1 --> C2 --> C3
-        end
-        
-        subgraph LPIM["2. LPIM<br/>(Recommended)"]
-            direction TB
-            L1["Windows Policy:<br/>Lock Pages"]
-            L2["ป้องกัน Paging ลง Disk"]
-            L3["เสถียรภาพสูง"]
-            L1 --> L2 --> L3
-        end
-        
-        subgraph LargePage["3. Large Page<br/>(Advanced)"]
-            direction TB
-            LP1["ใช้ 2MB Pages (แทน 4KB)"]
-            LP2["ลด TLB Overhead"]
-            LP3["Static Allocation<br/>Startup ช้า"]
-            LP1 --> LP2 --> LP3
-        end
+    subgraph Conventional["1. Conventional (Default)"]
+        direction TB
+        C1["Dynamic Allocation"]
+        C2["OS สามารถ Paging ได้"]
+        C3["เสี่ยง Performance Degradation"]
+        C1 --> C2 --> C3
+    end
+    
+    subgraph LPIM["2. LPIM (Recommended)"]
+        direction TB
+        L1["Windows Policy: Lock Pages"]
+        L2["ป้องกัน Paging ลง Disk"]
+        L3["เสถียรภาพสูง"]
+        L1 --> L2 --> L3
+    end
+    
+    subgraph LargePage["3. Large Page (Advanced)"]
+        direction TB
+        LP1["ใช้ 2MB Pages (แทน 4KB)"]
+        LP2["ลด TLB Overhead"]
+        LP3["Static Allocation Startup ช้า"]
+        LP1 --> LP2 --> LP3
     end
     
     OS2["Windows OS"]
@@ -114,11 +111,13 @@ flowchart TB
     L3 -.->|Lock| OS2
     LP3 --> OS2
     
+    Conventional -.->| | LPIM
+    LPIM -.->| | LargePage
+    
     style Conventional fill:#fbbf24,stroke:#f59e0b,stroke-width:2px
     style LPIM fill:#10b981,stroke:#059669,stroke-width:3px,color:#fff
     style LargePage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
     style OS2 fill:#64748b,stroke:#475569,stroke-width:2px,color:#fff
-    style Row1 fill:transparent,stroke:transparent,color:transparent
 ```
 
 **รายละเอียด:**
