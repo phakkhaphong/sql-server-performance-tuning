@@ -1,0 +1,78 @@
+# SQL Server Performance Tuning Repository - .gitignore
+
+# ============================================
+# IDE and Editor Files
+# ============================================
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ssmssln
+*.ssmssuo
+*.ssmssqlproj.user
+
+# ============================================
+# SQL Server Files
+# ============================================
+*.bak
+*.trn
+*.ldf
+*.mdf
+*.ndf
+*.log
+*.xel
+*.xem
+
+# ============================================
+# Temporary and Cache Files
+# ============================================
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Project Specific
+# ============================================
+# Old/legacy files (should not be in repo)
+old/
+Enter/
+pdf_content.txt
+*.pdf
+
+# ============================================
+# Credentials and Secrets
+# ============================================
+# Remove credentials from .vscode/settings.json
+# Keep only non-sensitive configuration
+
+# ============================================
+# Build and Output
+# ============================================
+bin/
+obj/
+*.dll
+*.exe
+
+# ============================================
+# Documentation (if generated)
+# ============================================
+docs/_build/
+*.docx
+*.doc
+
+# ============================================
+# Archive Files
+# ============================================
+*.rar
+*.zip
+*.7z
+*.tar
+*.gz
+

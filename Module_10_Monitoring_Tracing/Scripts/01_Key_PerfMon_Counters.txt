@@ -1,0 +1,12 @@
+Processor(_Total)\% Processor Time
+System\Processor Queue Length
+Memory\Available MBytes
+Paging File(_Total)\% Usage
+PhysicalDisk(_Total)\Avg. Disk sec/Read
+PhysicalDisk(_Total)\Avg. Disk sec/Write
+SQL Server:Buffer Manager\Page life expectancy
+SQL Server:General Statistics\User Connections
+SQL Server:Memory Manager\Memory Grants Pending
+SQL Server:SQL Statistics\Batch Requests/sec
+SQL Server:SQL Statistics\Compilations/sec
+SQL Server:SQL Statistics\Re-Compilations/sec
