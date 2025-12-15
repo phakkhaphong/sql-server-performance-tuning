@@ -135,6 +135,14 @@ Software RAID ที่จัดการโดย Windows:
 
 ### 5.1 Measuring Performance (Latency is King)
 ดัชนีชี้วัดที่สำคัญที่สุดคือ **Avg. Disk sec/Transfer** (PerfMon) หรือ `io_stall` (DMVs)
+
+**Log File (.ldf) Latency:**
+*   **1-5 ms**: ประสิทธิภาพสูงสุด (Optimal) - Log File ต้องการ Latency ต่ำที่สุดเพราะเป็น Sequential Write ที่สำคัญต่อ Transaction Performance
+*   **5-10 ms**: ยอมรับได้ (Acceptable) แต่ควรพิจารณา Optimize
+*   **> 10 ms**: เริ่มพบปัญหาประสิทธิภาพ (Degraded) - Transaction Commit อาจช้าลง
+*   **> 50 ms**: วิกฤต (Critical) - ผู้ใช้งานจะพบปัญหา Timeout หรือ Transaction Blocking
+
+**Data File (.mdf) Latency:**
 *   **< 5 ms**: ประสิทธิภาพสูง (SSD/NVMe level)
 *   **10-20 ms**: ยอมรับได้ (Acceptable) สำหรับ Data File
 *   **> 20 ms**: เริ่มพบปัญหาประสิทธิภาพ (Degraded)
