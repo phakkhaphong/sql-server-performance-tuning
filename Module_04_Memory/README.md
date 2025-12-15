@@ -83,44 +83,41 @@ graph TB
 ### 3.1 Memory Models
 
 ```mermaid
-graph TB
-    subgraph MemoryModels["SQL Server Memory Models"]
-        direction LR
-        
-        subgraph Conventional["1. Conventional Memory Model<br/>(Default)"]
-            direction TB
-            C1["Dynamic Allocation"]
-            C2["OS สามารถ Paging ได้"]
-            C3["เสี่ยง Performance<br/>Degradation"]
-            C1 --> C2 --> C3
-        end
-        
-        subgraph LPIM["2. Lock Pages in Memory (LPIM)<br/>(Recommended for Production)"]
-            direction TB
-            L1["Windows Policy:<br/>Lock Pages in Memory"]
-            L2["ป้องกัน Paging<br/>ลง Disk"]
-            L3["เสถียรภาพสูง"]
-            L1 --> L2 --> L3
-        end
-        
-        subgraph LargePage["3. Large Page Memory Model<br/>(Advanced)"]
-            direction TB
-            LP1["ใช้ 2MB Pages<br/>(แทน 4KB)"]
-            LP2["ลด TLB Overhead"]
-            LP3["Static Allocation<br/>Startup ช้า"]
-            LP1 --> LP2 --> LP3
-        end
+flowchart LR
+    subgraph Conventional["1. Conventional Memory Model<br/>(Default)"]
+        direction TB
+        C1["Dynamic Allocation"]
+        C2["OS สามารถ Paging ได้"]
+        C3["เสี่ยง Performance Degradation"]
+        C1 --> C2 --> C3
+    end
+    
+    subgraph LPIM["2. Lock Pages in Memory LPIM<br/>(Recommended)"]
+        direction TB
+        L1["Windows Policy:<br/>Lock Pages in Memory"]
+        L2["ป้องกัน Paging ลง Disk"]
+        L3["เสถียรภาพสูง"]
+        L1 --> L2 --> L3
+    end
+    
+    subgraph LargePage["3. Large Page Memory Model<br/>(Advanced)"]
+        direction TB
+        LP1["ใช้ 2MB Pages<br/>(แทน 4KB)"]
+        LP2["ลด TLB Overhead"]
+        LP3["Static Allocation<br/>Startup ช้า"]
+        LP1 --> LP2 --> LP3
     end
     
     OS2["Windows OS"]
     
-    Conventional --> OS2
-    LPIM -.->|Lock| OS2
-    LargePage --> OS2
+    C3 --> OS2
+    L3 -.->|Lock| OS2
+    LP3 --> OS2
     
     style Conventional fill:#fbbf24,stroke:#f59e0b,stroke-width:2px
     style LPIM fill:#10b981,stroke:#059669,stroke-width:3px,color:#fff
     style LargePage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
+    style OS2 fill:#64748b,stroke:#475569,stroke-width:2px,color:#fff
 ```
 
 **รายละเอียด:**
