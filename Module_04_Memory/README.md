@@ -53,8 +53,8 @@ graph TB
             CPU1B <--> LocalMem1
         end
         
-        LocalMem0 -.->|Remote Access<br/>~200-300ns<br/>(Slower)| LocalMem1
-        LocalMem1 -.->|Remote Access<br/>~200-300ns<br/>(Slower)| LocalMem0
+        LocalMem0 -.->|Remote 200-300ns| LocalMem1
+        LocalMem1 -.->|Remote 200-300ns| LocalMem0
     end
     
     subgraph SQLServer2["SQL Server"]
