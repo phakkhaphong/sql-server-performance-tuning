@@ -166,9 +166,9 @@ graph TB
     MemoryAllocator --> MTL
     
     ResourceMonitor -->|Monitor| PhysicalRAM
-    ResourceMonitor -->|Trim Caches<br/>เมื่อ LOW| MemoryAllocator
+    ResourceMonitor -->|Trim Caches เมื่อ LOW| MemoryAllocator
     
-    OS -.->|LPIM: Lock Pages<br/>(ป้องกัน Paging)| MemoryAllocator
+    OS -.->|LPIM: Lock Pages| MemoryAllocator
     
     style BPool fill:#2563eb,stroke:#1e40af,stroke-width:3px,color:#fff
     style OtherClerks fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
