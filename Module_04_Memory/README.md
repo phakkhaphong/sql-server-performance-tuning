@@ -39,7 +39,7 @@ flowchart TB
     subgraph Node0["NUMA Node 0"]
         CPU0A["CPU 0"]
         CPU0B["CPU 1"]
-        LocalMem0["Local Memory<br/>Fast Access ~100ns"]
+        LocalMem0["Local Memory<br/>Fast ~100ns"]
         CPU0A <--> LocalMem0
         CPU0B <--> LocalMem0
     end
@@ -47,7 +47,7 @@ flowchart TB
     subgraph Node1["NUMA Node 1"]
         CPU1A["CPU 2"]
         CPU1B["CPU 3"]
-        LocalMem1["Local Memory<br/>Fast Access ~100ns"]
+        LocalMem1["Local Memory<br/>Fast ~100ns"]
         CPU1A <--> LocalMem1
         CPU1B <--> LocalMem1
     end
@@ -57,7 +57,7 @@ flowchart TB
         Scheduler1["Scheduler 1<br/>(Node 1)"]
     end
     
-    LocalMem0 <-.->|Remote Access<br/>200-300ns| LocalMem1
+    LocalMem0 <-.->|Remote<br/>200-300ns| LocalMem1
     
     Scheduler0 -->|Allocates| LocalMem0
     Scheduler1 -->|Allocates| LocalMem1
@@ -83,27 +83,27 @@ flowchart TB
 flowchart TB
     subgraph Row1[" "]
         direction LR
-        subgraph Conventional["1. Conventional Memory Model (Default)"]
+        subgraph Conventional["1. Conventional<br/>(Default)"]
             direction TB
             C1["Dynamic Allocation"]
             C2["OS สามารถ Paging ได้"]
-            C3["เสี่ยง Performance Degradation"]
+            C3["เสี่ยง Performance<br/>Degradation"]
             C1 --> C2 --> C3
         end
         
-        subgraph LPIM["2. Lock Pages in Memory LPIM (Recommended)"]
+        subgraph LPIM["2. LPIM<br/>(Recommended)"]
             direction TB
-            L1["Windows Policy: Lock Pages in Memory"]
+            L1["Windows Policy:<br/>Lock Pages"]
             L2["ป้องกัน Paging ลง Disk"]
             L3["เสถียรภาพสูง"]
             L1 --> L2 --> L3
         end
         
-        subgraph LargePage["3. Large Page Memory Model (Advanced)"]
+        subgraph LargePage["3. Large Page<br/>(Advanced)"]
             direction TB
             LP1["ใช้ 2MB Pages (แทน 4KB)"]
             LP2["ลด TLB Overhead"]
-            LP3["Static Allocation Startup ช้า"]
+            LP3["Static Allocation<br/>Startup ช้า"]
             LP1 --> LP2 --> LP3
         end
     end
@@ -139,23 +139,23 @@ flowchart TB
         PageFile["Page File<br/>(Virtual Memory)"]
     end
     
-    MemoryAllocator["Memory Allocator<br/>(Any Size Page Allocator)"]
+    MemoryAllocator["Memory Allocator<br/>Any Size Page"]
     
-    subgraph BPool["Buffer Pool (SQLBUFFERPOOL)"]
-        DataPages["Data Pages (8KB)"]
-        IndexPages["Index Pages (8KB)"]
-    end
+        subgraph BPool["Buffer Pool<br/>(SQLBUFFERPOOL)"]
+            DataPages["Data Pages<br/>(8KB)"]
+            IndexPages["Index Pages<br/>(8KB)"]
+        end
+        
+        subgraph OtherClerks["Other Memory Clerks"]
+            PlanCache["Plan Cache<br/>(CACHESTORE_SQLCP)"]
+            ConnectionPool["Connection Pool<br/>(MEMORYCLERK)"]
+            LockManager["Lock Manager<br/>(OBJECTSTORE)"]
+            WorkspaceGrant["Workspace Memory<br/>(WORKSPACE)"]
+        end
     
-    subgraph OtherClerks["Other Memory Clerks"]
-        PlanCache["Plan Cache (CACHESTORE_SQLCP)"]
-        ConnectionPool["Connection Pool (MEMORYCLERK_SQLCONNECTIONPOOL)"]
-        LockManager["Lock Manager (OBJECTSTORE_LOCK_MANAGER)"]
-        WorkspaceGrant["Workspace Memory (WORKSPACE_MEMORY_GRANT)"]
-    end
+    MTL["Memory To Leave (MTL)<br/>Non-BPool"]
     
-    MTL["Memory To Leave (MTL)<br/>Non-BPool Allocations"]
-    
-    ResourceMonitor["Resource Monitor<br/>(Background Thread)<br/>ตรวจสอบ Memory Pressure"]
+    ResourceMonitor["Resource Monitor<br/>Background Thread<br/>Monitor Memory Pressure"]
     
     PhysicalRAM -->|Allocate| MemoryAllocator
     MemoryAllocator --> BPool
@@ -194,7 +194,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    CF["Classifier Function<br/>Route Sessions Based on Criteria"]
+    CF["Classifier Function<br/>Route Sessions"]
     
     subgraph WorkloadGroups["Workload Groups"]
         WG1["internal (System)"]
@@ -206,11 +206,11 @@ flowchart TB
     subgraph ResourcePools["Resource Pools"]
         RP1["internal<br/>MIN: 0% MAX: 100%"]
         RP2["default<br/>MIN: 0% MAX: 100%"]
-        RP3["ReportPool<br/>MIN: 10% MAX: 40%<br/>(Limit Memory)"]
+        RP3["ReportPool<br/>MIN: 10% MAX: 40%<br/>Limited"]
         RP4["ETLPool<br/>MIN: 20% MAX: 50%"]
     end
     
-    TotalMem["Total Available Memory<br/>(SQL Server Memory)"]
+    TotalMem["Total Available<br/>Memory"]
     
     CF --> WG1
     CF --> WG2
@@ -250,31 +250,31 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph SQLServerMemory["SQL Server Memory (Controlled by Max Server Memory)"]
-        subgraph BufferPool["Buffer Pool (ส่วนใหญ่ ~70-90%)"]
+    subgraph SQLServerMemory["SQL Server Memory<br/>(Max Server Memory)"]
+        subgraph BufferPool["Buffer Pool<br/>(~70-90%)"]
             direction LR
-            P1["Page 8KB Clean"]
-            P2["Page 8KB Clean"]
-            P3["Page 8KB Dirty"]
-            P4["Page 8KB Dirty"]
-            P5["Page 8KB Clean"]
+            P1["Page<br/>8KB Clean"]
+            P2["Page<br/>8KB Clean"]
+            P3["Page<br/>8KB Dirty"]
+            P4["Page<br/>8KB Dirty"]
+            P5["Page<br/>8KB Clean"]
             
             P1 -.->|Modified| P3
             P4 -.->|Checkpoint| P2
         end
         
-        subgraph MemoryClerks["Memory Clerks (อื่นๆ)"]
-            MC1["SQLQUERYPLAN (Plan Cache)"]
-            MC2["SQLCONNECTIONPOOL (Connection)"]
-            MC3["OBJECTSTORE_LOCK_MANAGER (Locks)"]
-            MC4["WORKSPACE_MEMORY_GRANT (Sort/Hash)"]
+        subgraph MemoryClerks["Memory Clerks<br/>(อื่นๆ)"]
+            MC1["SQLQUERYPLAN<br/>(Plan Cache)"]
+            MC2["SQLCONNECTIONPOOL<br/>(Connection)"]
+            MC3["OBJECTSTORE<br/>(Locks)"]
+            MC4["WORKSPACE<br/>(Sort/Hash)"]
         end
         
         MTL["Memory To Leave (MTL)"]
     end
     
-    LW["Lazy Writer<br/>เมื่อ Memory เต็ม ลบ Page ที่ไม่ได้ใช้<br/>(LRU Algorithm)"]
-    CP["Checkpoint<br/>เขียน Dirty Pages ลง Disk"]
+    LW["Lazy Writer<br/>Evict Unused Pages<br/>LRU Algorithm"]
+    CP["Checkpoint<br/>Write Dirty Pages<br/>to Disk"]
     
     DataFiles["Data Files (.mdf, .ndf)<br/>(Disk Storage)"]
     
@@ -388,17 +388,17 @@ flowchart TB
         end
         
         subgraph WaitTypes["3. Wait Types"]
-            WT1["RESOURCE_SEMAPHORE<br/>รอ Memory Grant (Sort/Hash)"]
-            WT2["CMEMTHREAD<br/>Thread Contention Memory Object"]
+            WT1["RESOURCE_SEMAPHORE<br/>Wait Memory Grant<br/>(Sort/Hash)"]
+            WT2["CMEMTHREAD<br/>Thread Contention<br/>Memory Object"]
         end
     end
     
     subgraph Monitoring["Monitoring Tools (DMVs)"]
         direction LR
-        DMV1["sys.dm_os_performance_counters<br/>Buffer Cache Hit Ratio"]
-        DMV2["sys.dm_os_performance_counters<br/>Page Life Expectancy"]
-        DMV3["sys.dm_os_wait_stats<br/>Wait Types"]
-        DMV4["sys.dm_os_memory_clerks<br/>Memory Usage"]
+        DMV1["dm_os_performance_counters<br/>Buffer Cache Hit Ratio"]
+        DMV2["dm_os_performance_counters<br/>Page Life Expectancy"]
+        DMV3["dm_os_wait_stats<br/>Wait Types"]
+        DMV4["dm_os_memory_clerks<br/>Memory Usage"]
     end
     
     Metric1 --> DMV1
