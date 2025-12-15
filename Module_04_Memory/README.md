@@ -83,11 +83,12 @@ graph TB
 ### 3.1 Memory Models
 
 ```mermaid
-graph LR
+graph TB
     subgraph MemoryModels["SQL Server Memory Models"]
-        direction TB
+        direction LR
         
         subgraph Conventional["1. Conventional Memory Model<br/>(Default)"]
+            direction TB
             C1["Dynamic Allocation"]
             C2["OS สามารถ Paging ได้"]
             C3["เสี่ยง Performance<br/>Degradation"]
@@ -95,6 +96,7 @@ graph LR
         end
         
         subgraph LPIM["2. Lock Pages in Memory (LPIM)<br/>(Recommended for Production)"]
+            direction TB
             L1["Windows Policy:<br/>Lock Pages in Memory"]
             L2["ป้องกัน Paging<br/>ลง Disk"]
             L3["เสถียรภาพสูง"]
@@ -102,6 +104,7 @@ graph LR
         end
         
         subgraph LargePage["3. Large Page Memory Model<br/>(Advanced)"]
+            direction TB
             LP1["ใช้ 2MB Pages<br/>(แทน 4KB)"]
             LP2["ลด TLB Overhead"]
             LP3["Static Allocation<br/>Startup ช้า"]
