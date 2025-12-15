@@ -135,7 +135,7 @@ flowchart TB
 flowchart TB
     subgraph OS["Windows OS"]
         PhysicalRAM["Physical RAM"]
-        PageFile["Page File"]
+        PageFile["Page File (virtual memory)"]
     end
     
     SpacerA[ ]
