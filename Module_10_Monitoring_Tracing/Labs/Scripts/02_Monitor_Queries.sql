@@ -13,7 +13,7 @@ SELECT
 ,	r.writes AS [Writes]
 ,	r.logical_reads AS [Logical Reads]
 ,	r.wait_type
-,	r.wait_time_ms AS [Wait (ms)]
+,	r.wait_time AS [Wait (ms)]
 ,	r.blocking_session_id AS [Blocker]
 ,	SUBSTRING(t.text, (r.statement_start_offset/2)+1, 
 		((CASE r.statement_end_offset 

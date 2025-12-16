@@ -8,7 +8,7 @@ SELECT
 ,	er.status
 ,	er.command
 ,	er.wait_type
-,	er.wait_time_ms
+,	er.wait_time
 ,	er.wait_resource
 ,	er.blocking_session_id
 ,	st.text AS query_text

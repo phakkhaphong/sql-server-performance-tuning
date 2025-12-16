@@ -68,7 +68,8 @@ SELECT
 ,	st.text AS query_text
 FROM sys.dm_os_waiting_tasks AS wt
 INNER JOIN sys.dm_exec_sessions AS es ON wt.session_id = es.session_id
-CROSS APPLY sys.dm_exec_sql_text(es.sql_handle) AS st
+LEFT JOIN sys.dm_exec_requests AS er ON wt.session_id = er.session_id
+OUTER APPLY sys.dm_exec_sql_text(er.sql_handle) AS st
 WHERE es.is_user_process = 1;
 GO
 

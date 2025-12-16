@@ -10,7 +10,7 @@ SELECT
 	r.session_id AS [Blocked Session]
 ,	r.blocking_session_id AS [Blocking Session]
 ,	r.wait_type
-,	r.wait_time_ms / 1000.0 AS [Wait Time (sec)]
+,	r.wait_time / 1000.0 AS [Wait Time (sec)]
 ,	r.wait_resource
 ,	r.status
 ,	DB_NAME(r.database_id) AS [Database]
@@ -21,7 +21,7 @@ SELECT
 FROM sys.dm_exec_requests r
 CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
 WHERE r.blocking_session_id <> 0
-ORDER BY r.wait_time_ms DESC;
+ORDER BY r.wait_time DESC;
 
 -- Head Blockers (sessions that are blocking others but not blocked themselves)
 SELECT
