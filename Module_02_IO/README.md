@@ -49,11 +49,11 @@
 
 | RAID Level | Read I/O | Write I/O (Penalty) | Use Case | Recommendation |
 |:-----------|:--------:|:-------------------:|:---------|:--------------|
-| **RAID 0** | 1 | 1 | ❌ ไม่แนะนำ (No redundancy) | ⚠️ Production ห้ามใช้ |
-| **RAID 1** | 1 | **2x** | Log files, TempDB | ✅ เหมาะสำหรับ Log |
+| **RAID 0** | 1 | 1 | TempDB | ✅ เหมาะสำหรับ TempDB (เร็วสุด, ไม่ต้อง Redundancy เพราะสร้างใหม่ทุก Restart) |
+| **RAID 1** | 1 | **2x** | OS, SQL Binaries | ✅ เหมาะสำหรับ OS/Binaries (ไม่ต้องเร็ว แต่ต้อง Mirror) |
 | **RAID 5** | 1 | **4x** | ❌ ไม่แนะนำสำหรับ Write-heavy | ⚠️ หลีกเลี่ยงสำหรับ Database |
 | **RAID 6** | 1 | **6x** | ❌ ไม่แนะนำสำหรับ Database | ⚠️ หลีกเลี่ยงสำหรับ Database |
-| **RAID 10** | 1 | **2x** | Data files, Log files | ✅ **Best Practice** |
+| **RAID 10** | 1 | **2x** | Data files, Log files | ✅ **Best Practice** (เร็ว + Redundancy) |
 
 > [!WARNING]
 > **RAID 5/6 Write Penalty**: ทุกๆ 1 Write จริง ต้องใช้ 4-6 I/O operations (อ่าน data, อ่าน parity, เขียน data, เขียน parity)
