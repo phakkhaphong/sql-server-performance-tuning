@@ -51,7 +51,7 @@ BEGIN
     ,	sod.OrderQty
     ,	sod.UnitPrice
     ,	sod.LineTotal
-    ,	c.FirstName + ' ' + c.LastName AS CustomerName
+    --,	c.FirstName + ' ' + c.LastName AS CustomerName
     FROM Sales.SalesOrderHeader soh
     INNER JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
     INNER JOIN Production.Product p ON sod.ProductID = p.ProductID
